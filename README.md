@@ -48,7 +48,7 @@ git clone https://github.com/TheC0deJunkie/thecodechat.git
 2. Change into the project directory:
 
 ```
-cd The-Code-Chat
+cd thecodechat
 ```
 ### Install the dependencies:
 
