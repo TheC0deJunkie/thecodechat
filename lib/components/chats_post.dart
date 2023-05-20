@@ -1,6 +1,7 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
+import 'package:thecodechat/components/comment_button.dart';
 import 'package:thecodechat/components/like_button.dart';
 
 class ChatPost extends StatefulWidget {
@@ -25,6 +26,8 @@ class _ChatPostState extends State<ChatPost> {
   //get the user from firebase
   final currentUser = FirebaseAuth.instance.currentUser!;
   bool isLiked = false;
+
+  final _commentTextController = TextEditingController();
 
   @override
   void initState() {
@@ -54,6 +57,53 @@ class _ChatPostState extends State<ChatPost> {
     }
   }
 
+  // add a comment
+  void addComment(String commentText) {
+    //write a comment to firestore under the comments collection for this post
+    FirebaseFirestore.instance
+        .collection('User Posts')
+        .doc(widget.postId)
+        .collection('Comments')
+        .add({
+      "CommentText": commentText,
+      "CommentedBy": currentUser!.email,
+      "CommentTime": Timestamp.now(), //remember to format this when displaying
+    });
+  }
+
+  // show a dialog box for adding a comment
+  void showCommentDialog() {
+    showDialog(
+      context: context,
+      builder: (context) => AlertDialog(
+        title: Text("Add Comment"),
+        content: TextField(
+          controller: _commentTextController,
+          decoration: InputDecoration(
+            hintText: "Write A Comment",
+          ),
+        ),
+        actions: [
+          //post button
+          TextButton(
+            onPressed: () => addComment(
+              _commentTextController.text,
+            ),
+            child: const Text("Post"),
+          ),
+
+          //cancel button
+          TextButton(
+            onPressed: () => Navigator.pop(context),
+            child: Text(
+              "Cancel",
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
     return Container(
@@ -63,30 +113,9 @@ class _ChatPostState extends State<ChatPost> {
         color: Colors.white,
         borderRadius: BorderRadius.circular(8),
       ),
-      child: Row(
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          Column(
-            children: [
-              //like button
-              LikeButton(
-                isLiked: isLiked,
-                onTap: toggleLike,
-              ),
-
-              const SizedBox(
-                height: 5,
-              ),
-
-              //like count
-              Text(
-                widget.likes.length.toString(),
-                style: TextStyle(color: Colors.grey),
-              ),
-            ],
-          ),
-          const SizedBox(
-            width: 15,
-          ),
           Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
@@ -100,6 +129,60 @@ class _ChatPostState extends State<ChatPost> {
                 height: 10,
               ),
               Text(widget.message),
+            ],
+          ),
+
+          const SizedBox(
+            width: 15,
+          ),
+
+          //buttons
+          Row(
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: [
+              //LIKE
+              Column(
+                children: [
+                  //like button
+                  LikeButton(
+                    isLiked: isLiked,
+                    onTap: toggleLike,
+                  ),
+
+                  const SizedBox(
+                    height: 5,
+                  ),
+
+                  //like count
+                  Text(
+                    widget.likes.length.toString(),
+                    style: TextStyle(color: Colors.grey),
+                  ),
+                ],
+              ),
+
+              SizedBox(
+                width: 10,
+              ),
+              //COMMENT
+              Column(
+                children: [
+                  //Comment Button
+                  CommentButton(
+                    onTap: showCommentDialog,
+                  ),
+
+                  const SizedBox(
+                    height: 5,
+                  ),
+
+                  //comment count
+                  Text(
+                    '0',
+                    style: TextStyle(color: Colors.grey),
+                  ),
+                ],
+              ),
             ],
           ),
         ],
