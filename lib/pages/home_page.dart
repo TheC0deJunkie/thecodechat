@@ -2,7 +2,9 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:thecodechat/components/chats_post.dart';
+import 'package:thecodechat/components/drawer.dart';
 import 'package:thecodechat/components/text_field.dart';
+import 'package:thecodechat/pages/profile_page.dart';
 
 class HomePage extends StatefulWidget {
   const HomePage({super.key});
@@ -40,20 +42,31 @@ class _HomePageState extends State<HomePage> {
     });
   }
 
+  //navigate to profile page
+  void goToProfile() {
+    //pop the menu drawer
+    Navigator.pop(context);
+
+    //go to the profile page
+    Navigator.push(
+      context,
+      MaterialPageRoute(
+        builder: (context) => ProfilePage(),
+      ),
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       backgroundColor: Colors.grey[300],
+      drawer: MyDrawer(
+        onProfile: goToProfile,
+        onSignOut: signOut,
+      ),
       appBar: AppBar(
         backgroundColor: Colors.grey[900],
         title: const Text('The Code Chat'),
-        actions: [
-          //signout button
-          IconButton(
-            onPressed: signOut,
-            icon: const Icon(Icons.logout),
-          )
-        ],
       ),
       body: Center(
         child: Column(
