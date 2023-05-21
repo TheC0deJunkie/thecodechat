@@ -1,22 +1,25 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
+import 'package:thecodechat/components/comment.dart';
 import 'package:thecodechat/components/comment_button.dart';
 import 'package:thecodechat/components/like_button.dart';
+import 'package:thecodechat/helper/helper_methods.dart';
 
 class ChatPost extends StatefulWidget {
   final String message;
   final String user;
+  final String time;
   final String postId;
   final List<String> likes;
   // final String time;
-  const ChatPost({
-    super.key,
-    required this.message,
-    required this.user,
-    required this.likes,
-    required this.postId,
-  });
+  const ChatPost(
+      {super.key,
+      required this.message,
+      required this.user,
+      required this.likes,
+      required this.postId,
+      required this.time});
 
   @override
   State<ChatPost> createState() => _ChatPostState();
@@ -84,20 +87,26 @@ class _ChatPostState extends State<ChatPost> {
           ),
         ),
         actions: [
-          //post button
-          TextButton(
-            onPressed: () => addComment(
-              _commentTextController.text,
-            ),
-            child: const Text("Post"),
-          ),
-
           //cancel button
           TextButton(
-            onPressed: () => Navigator.pop(context),
+            onPressed: () {
+              Navigator.pop(context);
+
+              //clear the controller
+              _commentTextController.clear();
+            },
             child: Text(
               "Cancel",
             ),
+          ),
+          //post button
+          TextButton(
+            onPressed: () {
+              addComment(_commentTextController.text);
+              _commentTextController.clear();
+              Navigator.pop(context);
+            },
+            child: const Text("Post"),
           ),
         ],
       ),
@@ -110,7 +119,7 @@ class _ChatPostState extends State<ChatPost> {
       margin: const EdgeInsets.only(top: 25, left: 25, right: 25),
       padding: EdgeInsets.all(25),
       decoration: BoxDecoration(
-        color: Colors.white,
+        color: Colors.grey[200],
         borderRadius: BorderRadius.circular(8),
       ),
       child: Column(
@@ -119,21 +128,41 @@ class _ChatPostState extends State<ChatPost> {
           Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              Text(
-                widget.user,
-                style: TextStyle(
-                  color: Colors.grey[500],
-                ),
+              //message
+              Text(widget.message),
+              const SizedBox(
+                height: 10,
+              ),
+              //user
+              Row(
+                children: [
+                  //user
+                  Text(
+                    widget.user,
+                    style: TextStyle(color: Colors.grey[400]),
+                  ),
+
+                  //separator
+                  Text(
+                    " - ",
+                    style: TextStyle(color: Colors.grey[400]),
+                  ),
+
+                  //time
+                  Text(
+                    widget.time,
+                    style: TextStyle(color: Colors.grey[400]),
+                  ),
+                ],
               ),
               const SizedBox(
                 height: 10,
               ),
-              Text(widget.message),
             ],
           ),
 
           const SizedBox(
-            width: 15,
+            width: 20,
           ),
 
           //buttons
@@ -185,6 +214,43 @@ class _ChatPostState extends State<ChatPost> {
               ),
             ],
           ),
+
+          const SizedBox(
+            height: 10,
+          ),
+
+          //comments under the post
+          StreamBuilder<QuerySnapshot>(
+            stream: FirebaseFirestore.instance
+                .collection('User Posts')
+                .doc(widget.postId)
+                .collection('Comments')
+                .orderBy('CommentTime', descending: true)
+                .snapshots(),
+            builder: (context, snapshot) {
+              //show loading circle if there is no data yet
+              if (!snapshot.hasData) {
+                return const Center(
+                  child: CircularProgressIndicator(),
+                );
+              }
+              return ListView(
+                shrinkWrap: true, //for nested lists
+                physics: NeverScrollableScrollPhysics(),
+                children: snapshot.data!.docs.map((doc) {
+                  //get the comment from Firebase
+                  final commentData = doc.data() as Map<String, dynamic>;
+
+                  //return the comment
+                  return Comment(
+                    comment: commentData['CommentText'],
+                    time: formatDate(commentData['CommentTime']),
+                    user: commentData['CommentedBy'],
+                  );
+                }).toList(),
+              );
+            },
+          )
         ],
       ),
     );

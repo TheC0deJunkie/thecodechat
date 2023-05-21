@@ -4,6 +4,7 @@ import 'package:flutter/material.dart';
 import 'package:thecodechat/components/chats_post.dart';
 import 'package:thecodechat/components/drawer.dart';
 import 'package:thecodechat/components/text_field.dart';
+import 'package:thecodechat/helper/helper_methods.dart';
 import 'package:thecodechat/pages/profile_page.dart';
 
 class HomePage extends StatefulWidget {
@@ -91,6 +92,7 @@ class _HomePageState extends State<HomePage> {
                         return ChatPost(
                           message: post["Message"],
                           user: post["UserEmail"],
+                          time: formatDate(post["TimeStamp"]),
                           postId: post.id,
                           likes: List<String>.from(post["Likes"] ?? []),
                         );
@@ -121,9 +123,16 @@ class _HomePageState extends State<HomePage> {
                         obscureText: false),
                   ),
 
-                  IconButton(
-                      onPressed: postMessage,
-                      icon: const Icon(Icons.arrow_circle_up_outlined))
+                  Container(
+                    height: 48,
+                    decoration: BoxDecoration(
+                      color: Colors.grey[900],
+                      borderRadius: BorderRadius.circular(8),
+                    ),
+                    child: IconButton(
+                        onPressed: postMessage,
+                        icon: const Icon(Icons.arrow_circle_up_outlined)),
+                  )
                 ],
               ),
             ),
