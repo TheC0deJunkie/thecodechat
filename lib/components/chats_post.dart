@@ -122,6 +122,7 @@ class _ChatPostState extends State<ChatPost> {
         color: Colors.grey[200],
         borderRadius: BorderRadius.circular(8),
       ),
+      width: 400,
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [

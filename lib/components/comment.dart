@@ -13,8 +13,8 @@ class Comment extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Container(
-      margin: EdgeInsets.only(bottom: 5),
-      padding: EdgeInsets.all(15),
+      margin: const EdgeInsets.only(bottom: 5),
+      padding: const EdgeInsets.all(15),
       decoration: BoxDecoration(
         color: Colors.grey[300],
         borderRadius: BorderRadius.circular(4),
@@ -23,9 +23,11 @@ class Comment extends StatelessWidget {
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           //comment
-          Text(comment),
+          Text(
+            comment,
+          ),
 
-          SizedBox(
+          const SizedBox(
             height: 5,
           ),
 
